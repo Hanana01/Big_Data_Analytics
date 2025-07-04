@@ -1,11 +1,18 @@
 import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Sales from './pages/Sales';
+import Dashboard from './pages/Dashboard';
 
 function App() {
   return (
-    <div style={{ padding: '2rem' }}>
-      <h1>Welcome to E-Commerce Analytics Dashboard</h1>
-      <p>This is your main React app. You can start building your pages here.</p>
-    </div>
+    <Router>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/sales" element={<Sales />} />
+      </Routes>
+    </Router>
   );
 }
 

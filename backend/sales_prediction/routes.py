@@ -1,20 +1,12 @@
 from flask import Blueprint, jsonify
-from .preprocess import preprocess_data
-from .train_model import train_model
+from .train_model import train_forecast_model
 
+sales_bp = Blueprint("sales", __name__)
 
-sales_prediction_bp = Blueprint('sales_prediction', __name__)
-
-@sales_prediction_bp.route('/preprocess', methods=['GET'])
-def preprocess():
-    preprocess_data()
-    return jsonify({'message': 'Preprocessing completed.'})
-
-@sales_prediction_bp.route('/train', methods=['GET'])
-def train():
-    train_model()
-    return jsonify({'message': 'Model training completed.'})
-
-
-
-
+@sales_bp.route("/", methods=["GET"])
+def get_sales_forecast():
+    try:
+        forecast = train_forecast_model()
+        return jsonify(forecast)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

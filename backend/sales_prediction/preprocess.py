@@ -1,56 +1,26 @@
-import pandas as pd
-import numpy as np
-from sklearn.preprocessing import LabelEncoder, StandardScaler
-import os
+def load_and_merge_sales():
+    import pandas as pd
 
-def preprocess_data():
-    # Load dataset
-    current_dir = os.path.dirname(__file__)
-    data_path = os.path.join(current_dir, 'data/sales.csv')
-    df = pd.read_csv(data_path)
+    sales = pd.read_csv("backend/data/sales.csv")
+    products = pd.read_csv("backend/data/products.csv")
 
-    # Drop irrelevant columns
-    df.drop(columns=['Sales ID'], inplace=True)
+    # Remove any leading/trailing spaces in column names
+    sales.columns = sales.columns.str.strip()
+    products.columns = products.columns.str.strip()
 
-    # Convert Date column to datetime format
-    df['Date'] = pd.to_datetime(df['Date'])
+    # Ensure matching dtypes for merge
+    sales["Product ID"] = sales["Product ID"].astype(str)
+    products["Product ID"] = products["Product ID"].astype(str)
 
-    # Handle missing values
-    df.fillna({
-        'Price': df['Price'].median(),
-        'Discount': df['Discount'].median(),
-        'Weather Condition': df['Weather Condition'].mode()[0],
-        'Holiday/Promotion': 0,
-        'Competitor Pricing': df['Competitor Pricing'].median(),
-        'Seasonality': df['Seasonality'].mode()[0]
-    }, inplace=True)
+    sales["Date"] = pd.to_datetime(sales["Date"])
+    products["Date"] = pd.to_datetime(products["Date"])
 
-    # Encode categorical variables
-    categorical_cols = ['Store ID', 'Product ID', 'Category', 'Region', 'Weather Condition', 'Seasonality']
-    label_encoders = {}
-    for col in categorical_cols:
-        le = LabelEncoder()
-        df[col] = le.fit_transform(df[col])
-        label_encoders[col] = le  # Store encoders for later use
+    sales["Store ID"] = sales["Store ID"].astype(str)
+    products["Store ID"] = products["Store ID"].astype(str)
 
-    # Feature Engineering: Extract time-based features
-    df['Year'] = df['Date'].dt.year
-    df['Month'] = df['Date'].dt.month
-    df['Weekday'] = df['Date'].dt.weekday
-    df['Quarter'] = df['Date'].dt.quarter
-    df['Is_Weekend'] = df['Weekday'].apply(lambda x: 1 if x >= 5 else 0)
+    merged = sales.merge(products, on=["Product ID", "Date", "Store ID"], how="left")
+    
+    # Optional: print merged columns for debugging
+    print("Merged Columns:", merged.columns.tolist())
 
-    # Scaling numerical features
-    numerical_cols = ['Price', 'Discount', 'Competitor Pricing']
-    scaler = StandardScaler()
-    df[numerical_cols] = scaler.fit_transform(df[numerical_cols])
-
-    # Save processed data
-    processed_path = os.path.join(current_dir, 'data/processed_sales.csv')
-    df.to_csv(processed_path, index=False)
-
-    print("Preprocessing completed successfully!")
-
-# Run preprocessing
-if __name__ == '__main__':
-    preprocess_data()
+    return merged
