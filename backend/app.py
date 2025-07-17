@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
-from backend.sales_prediction.routes import sales_bp
+from sales_prediction.routes import sales_bp
 #from backend.inventory_optimization.routes import inventory_optimization_bp
 #from backend.customer_segmentation.routes import customer_segmentation_bp
 

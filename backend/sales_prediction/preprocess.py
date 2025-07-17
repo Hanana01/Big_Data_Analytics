@@ -1,8 +1,8 @@
 def load_and_merge_sales():
     import pandas as pd
 
-    sales = pd.read_csv("backend/data/sales.csv")
-    products = pd.read_csv("backend/data/products.csv")
+    sales = pd.read_csv("data/sales.csv")
+    products = pd.read_csv("data/products.csv")
 
     # Remove any leading/trailing spaces in column names
     sales.columns = sales.columns.str.strip()
