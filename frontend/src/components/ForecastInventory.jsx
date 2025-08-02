@@ -1,41 +1,279 @@
+// import * as React from 'react';
+// import { useState } from 'react';
+// import { LineChart } from '@mui/x-charts/LineChart';
+// import { TextField, Button, CircularProgress } from '@mui/material';
+
+// export default function ForecastInventoryMui() {
+//   const [pid, setPid] = useState('');
+//   const [storeId, setStoreId] = useState(''); 
+//   const [data, setData] = useState(null);
+//   const [error, setError] = useState('');
+//   const [loading, setLoading] = useState(false);
+// const productsList = [
+//   { id: 1, name: "Coat" },
+//   { id: 2, name: "Hoodie" },
+//   { id: 3, name: "Jacket" },
+//   { id: 4, name: "Overcoat" },
+//   { id: 5, name: "Blazer" },
+//   { id: 6, name: "Blouse" },
+//   { id: 7, name: "Shirt" },
+//   { id: 8, name: "Jeans" },
+//   { id: 9, name: "Trousers" },
+//   { id: 10, name: "T-shirt" },
+//   { id: 11, name: "Shorts" },
+//   { id: 12, name: "Skirt" },
+//   { id: 13, name: "Saree" },
+//   { id: 14, name: "Bag" },
+//   { id: 15, name: "Belt" },
+//   { id: 16, name: "Gloves" },
+//   { id: 17, name: "Fragrances" },
+//   { id: 18, name: "Wristwear" },
+//   { id: 19, name: "Sunglasses" },
+//   { id: 20, name: "Hat" },
+// ];
+//   const fetchData = async (e) => {
+//     e.preventDefault();
+//     setLoading(true);
+//     try {
+//       const res = await fetch(`http://localhost:5000/forecast-inventory?product_id=${pid}&store_id=${storeId}`);  // changed here
+//       const resJson = await res.json();
+//       if (!res.ok) throw new Error(resJson.error || 'Failed to fetch');
+//       setData(resJson);
+//       setError('');
+//     } catch (e) {
+//       setData(null);
+//       setError(e.message);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const chartData = data;
+//   const xLabels = data ? chartData.chart.map((item) => item.Date) : [];
+
+//   return (
+//     <div className="container mx-auto mt-12 space-y-12 px-4 pb-12">
+//       {/* Always-visible Form */}
+//       <div className="bg-white p-6 rounded-lg shadow border border-gray-200 flex items-center justify-between">
+//         <h1 className='font-bold text-xl w-full'>📈 Demand Forecast & Inventory Dashboard</h1>
+//         <form onSubmit={fetchData} className="w-full flex flex-wrap gap-10 items-end mb-4 justify-end">
+//           <select
+//             required
+//             value={pid}
+//             onChange={(e) => setPid(e.target.value)}
+//             className="w-40 p-2 border border-gray-300 rounded"
+//           >
+//             <option value="" disabled>Select Product</option>
+//             {productsList.map((p) => (
+//               <option key={p.id} value={p.id}>
+//                 {p.name}
+//               </option>
+//             ))}
+//           </select>
+//           <TextField
+//             label="Store ID"                       
+//             type="number"
+//             value={storeId}                         
+//             onChange={(e) => setStoreId(e.target.value)} 
+//             size="small"
+//             inputProps={{ min: 0, max: 5 }}
+//             required
+//             className="w-40"
+//           />
+//           <Button
+//             type="submit"
+//             variant="contained"
+//             className="!bg-indigo-600 !text-white hover:!bg-indigo-700 transition-all"
+//           >
+//             Load Data
+//           </Button>
+//         </form>
+//         {error && (
+//           <p className="text-red-600 font-semibold">
+//             ❌ {error === 'Failed to fetch' ? 'Backend not reachable or crashed' : error}
+//           </p>
+//         )}
+//       </div>
+
+//       {/* Loading Spinner */}
+//       {loading && (
+//         <div className="flex flex-col items-center justify-center mt-24">
+//           <CircularProgress />
+//           <p className="mt-4 text-gray-500 text-lg">Loading data...</p>
+//         </div>
+//       )}
+
+//       {/* Summary & Charts if Data Exists */}
+//       {!loading && data && (
+//         <>
+//           {/* Summary Card */}
+//           <div className="container bg-white p-6 rounded-lg shadow border border-gray-100 space-y-2">
+//             <h2 className="text-2xl font-bold mb-2 text-gray-800">📦 Inventory Summary</h2>
+//             <p><span className="font-medium">Date Range:</span> {chartData.date_range.from} → {chartData.date_range.to}</p>
+//             <hr className="my-2" />
+//             <p><span className="font-medium">EOQ:</span> {chartData.eoq}</p>
+//             <p><span className="font-medium">Safety Stock:</span> {chartData.safety_stock}</p>
+//             <p><span className="font-medium">Reorder Point:</span> {chartData.reorder_point}</p>
+//             <p><span className="font-medium">Current Inventory:</span> {chartData.daily_inventory_levels}</p>
+//             <p>
+//               <span className="font-medium">Status:</span>{' '}
+//               <span className={chartData.reorder_needed ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
+//                 {chartData.reorder_needed ? '🚨 Reorder Needed' : '✅ Inventory Sufficient'}
+//               </span>
+//             </p>
+//           </div>
+
+//           {/* Demand Forecast Chart */}
+//           <div className="bg-white p-6 rounded-lg shadow border border-gray-100">
+//             <h2 className="text-xl font-semibold mb-4 text-gray-700">📈 Demand Forecast (Last 30 Days)</h2>
+//             <LineChart
+//               xAxis={[{ scaleType: 'band', data: xLabels }]}
+//               series={[
+//                 {
+//                   data: chartData.chart.map((item) => item.actual),
+//                   label: 'Actual Demand',
+//                   color: '#8884d8',
+//                   curve: 'linear',
+//                 },
+//                 {
+//                   data: chartData.chart.map((item) => item.predicted),
+//                   label: 'Predicted Demand',
+//                   color: '#82ca9d',
+//                   curve: 'linear',
+//                 },
+//               ]}
+//               height={350}
+//               tooltip
+//               legend
+//             />
+//           </div>
+
+//                 {/* Demand Forecast Chart */}
+//         <div className="bg-white p-6 rounded-lg shadow border border-gray-100">
+//         <h2 className="text-xl font-semibold mb-4 text-gray-700">📈 Sold Units vs Predicted Demand (Last 30 Days)</h2>
+//         <LineChart
+//             xAxis={[{ scaleType: 'band', data: xLabels }]}
+//             series={[
+//             {
+//                 data: chartData.chart.map((item) => item.predicted),
+//                 label: 'Predicted Demand',
+//               color: '#82ca9d',
+//                 curve: 'linear',
+//             },
+//             {
+//                 data: chartData.chart.map((item) => item.units_sold),
+//                 label: 'Sold Units',
+//                     color: '#00BFFF',
+//                 curve: 'linear',
+//             },
+//             ]}
+//             height={350}
+//             tooltip
+//             legend
+//         />
+//         </div>
+
+
+//           {/* Inventory Optimization Chart */}
+//           <div className="bg-white p-6 rounded-lg shadow border border-gray-100">
+//             <h2 className="text-xl font-semibold mb-4 text-gray-700">📊 Inventory Optimization Metrics</h2>
+//             <LineChart
+//               xAxis={[{ scaleType: 'band', data: xLabels }]}
+//               series={[
+//                 {
+//                   data: chartData.chart.map(() => chartData.eoq),
+//                   label: 'EOQ',
+//                   color: '#228B22',
+//                   curve: 'linear',
+//                 },
+//                 {
+//                   data: chartData.chart.map(() => chartData.safety_stock),
+//                   label: 'Safety Stock',
+//                   color: '#FFA500',
+//                   curve: 'linear',
+//                 },
+//                 {
+//                   data: chartData.chart.map(() => chartData.reorder_point),
+//                   label: 'Reorder Point',
+//                   color: '#FF0000',
+//                   curve: 'linear',
+//                 },
+//                 {
+//                   data: chartData.chart.map(() => chartData.inventory_level),
+//                   label: 'Current Inventory',
+//                   color: '#800080',
+//                   curve: 'linear',
+//                 },
+//                 {
+//                   data: chartData.chart.map((item) => item.actual),
+//                   label: 'Actual Demand',
+//                   color: '#8884d8',
+//                   curve: 'linear',
+//                 },
+//                 {
+//                   data: chartData.chart.map((item) => item.predicted),
+//                   label: 'Predicted Demand',
+//                   color: '#82ca9d',
+//                   curve: 'linear',
+//                 },
+//                 {
+//                   data: chartData.chart.map((item) => item.units_sold),
+//                   label: 'Sold Units',
+//                   color: '#00BFFF',
+//                   curve: 'linear',
+//                 },
+//               ]}
+//               height={350}
+//               tooltip
+//               legend
+//             />
+//           </div>
+//         </>
+//       )}
+//     </div>
+//   );
+// }
 import * as React from 'react';
 import { useState } from 'react';
 import { LineChart } from '@mui/x-charts/LineChart';
 import { TextField, Button, CircularProgress } from '@mui/material';
+import { PieChart, Pie, Cell, Legend, Tooltip } from 'recharts';
 
 export default function ForecastInventoryMui() {
   const [pid, setPid] = useState('');
-  const [storeId, setStoreId] = useState(''); 
+  const [storeId, setStoreId] = useState('');
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-const productsList = [
-  { id: 1, name: "Coat" },
-  { id: 2, name: "Hoodie" },
-  { id: 3, name: "Jacket" },
-  { id: 4, name: "Overcoat" },
-  { id: 5, name: "Blazer" },
-  { id: 6, name: "Blouse" },
-  { id: 7, name: "Shirt" },
-  { id: 8, name: "Jeans" },
-  { id: 9, name: "Trousers" },
-  { id: 10, name: "T-shirt" },
-  { id: 11, name: "Shorts" },
-  { id: 12, name: "Skirt" },
-  { id: 13, name: "Saree" },
-  { id: 14, name: "Bag" },
-  { id: 15, name: "Belt" },
-  { id: 16, name: "Gloves" },
-  { id: 17, name: "Fragrances" },
-  { id: 18, name: "Wristwear" },
-  { id: 19, name: "Sunglasses" },
-  { id: 20, name: "Hat" },
-];
+
+  const productsList = [
+    { id: 1, name: "Coat" },
+    { id: 2, name: "Hoodie" },
+    { id: 3, name: "Jacket" },
+    { id: 4, name: "Overcoat" },
+    { id: 5, name: "Blazer" },
+    { id: 6, name: "Blouse" },
+    { id: 7, name: "Shirt" },
+    { id: 8, name: "Jeans" },
+    { id: 9, name: "Trousers" },
+    { id: 10, name: "T-shirt" },
+    { id: 11, name: "Shorts" },
+    { id: 12, name: "Skirt" },
+    { id: 13, name: "Saree" },
+    { id: 14, name: "Bag" },
+    { id: 15, name: "Belt" },
+    { id: 16, name: "Gloves" },
+    { id: 17, name: "Fragrances" },
+    { id: 18, name: "Wristwear" },
+    { id: 19, name: "Sunglasses" },
+    { id: 20, name: "Hat" },
+  ];
+
   const fetchData = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/forecast-inventory?product_id=${pid}&store_id=${storeId}`);  // changed here
+      const res = await fetch(`http://localhost:5000/forecast-inventory?product_id=${pid}&store_id=${storeId}`);
       const resJson = await res.json();
       if (!res.ok) throw new Error(resJson.error || 'Failed to fetch');
       setData(resJson);
@@ -53,7 +291,7 @@ const productsList = [
 
   return (
     <div className="container mx-auto mt-12 space-y-12 px-4 pb-12">
-      {/* Always-visible Form */}
+      {/* Form */}
       <div className="bg-white p-6 rounded-lg shadow border border-gray-200 flex items-center justify-between">
         <h1 className='font-bold text-xl w-full'>📈 Demand Forecast & Inventory Dashboard</h1>
         <form onSubmit={fetchData} className="w-full flex flex-wrap gap-10 items-end mb-4 justify-end">
@@ -71,10 +309,10 @@ const productsList = [
             ))}
           </select>
           <TextField
-            label="Store ID"                       
+            label="Store ID"
             type="number"
-            value={storeId}                         
-            onChange={(e) => setStoreId(e.target.value)} 
+            value={storeId}
+            onChange={(e) => setStoreId(e.target.value)}
             size="small"
             inputProps={{ min: 0, max: 5 }}
             required
@@ -103,25 +341,25 @@ const productsList = [
         </div>
       )}
 
-      {/* Summary & Charts if Data Exists */}
+      {/* Summary & Charts */}
       {!loading && data && (
         <>
-          {/* Summary Card */}
-          <div className="container bg-white p-6 rounded-lg shadow border border-gray-100 space-y-2">
+          {/* Inventory Summary */}
+          {/* <div className="container bg-white p-6 rounded-lg shadow border border-gray-100 space-y-2">
             <h2 className="text-2xl font-bold mb-2 text-gray-800">📦 Inventory Summary</h2>
             <p><span className="font-medium">Date Range:</span> {chartData.date_range.from} → {chartData.date_range.to}</p>
             <hr className="my-2" />
             <p><span className="font-medium">EOQ:</span> {chartData.eoq}</p>
             <p><span className="font-medium">Safety Stock:</span> {chartData.safety_stock}</p>
             <p><span className="font-medium">Reorder Point:</span> {chartData.reorder_point}</p>
-            <p><span className="font-medium">Current Inventory:</span> {chartData.daily_inventory_levels}</p>
+            <p><span className="font-medium">Current Inventory:</span> {chartData.latest_inventory}</p>
             <p>
               <span className="font-medium">Status:</span>{' '}
               <span className={chartData.reorder_needed ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
                 {chartData.reorder_needed ? '🚨 Reorder Needed' : '✅ Inventory Sufficient'}
               </span>
             </p>
-          </div>
+          </div> */}
 
           {/* Demand Forecast Chart */}
           <div className="bg-white p-6 rounded-lg shadow border border-gray-100">
@@ -148,68 +386,12 @@ const productsList = [
             />
           </div>
 
-                {/* Demand Forecast Chart */}
-        <div className="bg-white p-6 rounded-lg shadow border border-gray-100">
-        <h2 className="text-xl font-semibold mb-4 text-gray-700">📈 Sold Units vs Predicted Demand (Last 30 Days)</h2>
-        <LineChart
-            xAxis={[{ scaleType: 'band', data: xLabels }]}
-            series={[
-            {
-                data: chartData.chart.map((item) => item.predicted),
-                label: 'Predicted Demand',
-              color: '#82ca9d',
-                curve: 'linear',
-            },
-            {
-                data: chartData.chart.map((item) => item.units_sold),
-                label: 'Sold Units',
-                    color: '#00BFFF',
-                curve: 'linear',
-            },
-            ]}
-            height={350}
-            tooltip
-            legend
-        />
-        </div>
-
-
-          {/* Inventory Optimization Chart */}
+          {/* Sold Units vs Predicted Demand */}
           <div className="bg-white p-6 rounded-lg shadow border border-gray-100">
-            <h2 className="text-xl font-semibold mb-4 text-gray-700">📊 Inventory Optimization Metrics</h2>
+            <h2 className="text-xl font-semibold mb-4 text-gray-700">📈 Sold Units vs Predicted Demand (Last 30 Days)</h2>
             <LineChart
               xAxis={[{ scaleType: 'band', data: xLabels }]}
               series={[
-                {
-                  data: chartData.chart.map(() => chartData.eoq),
-                  label: 'EOQ',
-                  color: '#228B22',
-                  curve: 'linear',
-                },
-                {
-                  data: chartData.chart.map(() => chartData.safety_stock),
-                  label: 'Safety Stock',
-                  color: '#FFA500',
-                  curve: 'linear',
-                },
-                {
-                  data: chartData.chart.map(() => chartData.reorder_point),
-                  label: 'Reorder Point',
-                  color: '#FF0000',
-                  curve: 'linear',
-                },
-                {
-                  data: chartData.chart.map(() => chartData.inventory_level),
-                  label: 'Current Inventory',
-                  color: '#800080',
-                  curve: 'linear',
-                },
-                {
-                  data: chartData.chart.map((item) => item.actual),
-                  label: 'Actual Demand',
-                  color: '#8884d8',
-                  curve: 'linear',
-                },
                 {
                   data: chartData.chart.map((item) => item.predicted),
                   label: 'Predicted Demand',
@@ -228,6 +410,150 @@ const productsList = [
               legend
             />
           </div>
+{/* Inventory Optimization Chart */}
+<div className="bg-white p-6 rounded-lg shadow border border-gray-100">
+  <h2 className="text-xl font-semibold mb-4 text-gray-700">📊 Inventory Optimization Metrics (Last 30 Days)</h2>
+  <LineChart
+    xAxis={[{ scaleType: 'band', data: xLabels }]}
+    series={[
+      {
+        data: chartData.chart.map(() => chartData.eoq),
+        label: 'EOQ',
+        color: '#228B22',
+        curve: 'linear',
+      },
+      {
+        data: chartData.chart.map(() => chartData.safety_stock),
+        label: 'Safety Stock',
+        color: '#FFA500',
+        curve: 'linear',
+      },
+      {
+        data: chartData.chart.map((_, idx) => chartData.reorder_point_daily[idx]),
+        label: 'Reorder Point',
+        color: '#FF0000',
+        curve: 'linear',
+      },
+      {
+        data: chartData.chart.map((item) => item.inventory_level),
+        label: 'Current Inventory',
+        color: '#800080',
+        curve: 'linear',
+      },
+      {
+        data: chartData.chart.map((item) => item.actual),
+        label: 'Actual Demand',
+        color: '#8884d8',
+        curve: 'linear',
+      },
+      {
+        data: chartData.chart.map((item) => item.predicted),
+        label: 'Predicted Demand',
+        color: '#82ca9d',
+        curve: 'linear',
+      },
+      // {
+      //   data: chartData.chart.map((item) => item.units_sold),
+      //   label: 'Sold Units',
+      //   color: '#00BFFF',
+      //   curve: 'linear',
+      // },
+    ]}
+    height={350}
+    tooltip
+    legend
+  />
+</div>
+<div className="mt-6 bg-white p-4 rounded-lg shadow border border-gray-100 max-h-64 overflow-auto">
+  <h3 className="text-lg font-semibold mb-3 text-gray-700">📅 Daily Reorder Status</h3>
+  <table className="w-full text-sm text-left border-collapse border border-gray-300">
+    <thead>
+      <tr>
+        <th className="border border-gray-300 px-2 py-1">Date</th>
+        <th className="border border-gray-300 px-2 py-1">Inventory Level</th>
+        <th className="border border-gray-300 px-2 py-1">Reorder Point</th>
+        <th className="border border-gray-300 px-2 py-1">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {data.chart.map((item, idx) => {
+        const reorderPoint = data.reorder_point_daily ? data.reorder_point_daily[idx] : data.reorder_point;
+        const status = item.inventory_level <= reorderPoint ? '🚨 Reorder Needed' : '✅ OK';
+        const statusColor = item.inventory_level <= reorderPoint ? 'text-red-600' : 'text-green-600';
+        return (
+          <tr key={item.Date}>
+            <td className="border border-gray-300 px-2 py-1">{item.Date}</td>
+            <td className="border border-gray-300 px-2 py-1">{item.inventory_level}</td>
+            <td className="border border-gray-300 px-2 py-1">{reorderPoint.toFixed(2)}</td>
+            <td className={`border border-gray-300 px-2 py-1 font-semibold ${statusColor}`}>{status}</td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+</div>
+
+          {/* Cost Breakdown Pie Chart */}
+<div className="bg-white p-6 rounded-lg shadow border border-gray-100 mt-8">
+  {/* Dynamic Alert Message */}
+  {(() => {
+    const holding = data.total_holding_cost;
+    const ordering = data.total_ordering_cost;
+    let alertMessage = '';
+    let bgColor = 'bg-yellow-50';
+    let borderColor = 'border-yellow-400';
+    let textColor = 'text-yellow-800';
+
+    if (holding > 1.5 * ordering) {
+      alertMessage =
+        '⚠️ High holding costs detected. Consider reducing overstock or ordering in smaller batches.';
+      bgColor = 'bg-red-50';
+      borderColor = 'border-red-400';
+      textColor = 'text-red-800';
+    } else if (ordering > 1.5 * holding) {
+      alertMessage =
+        '⚠️ High ordering costs detected. Consider increasing order quantity or reducing order frequency.';
+      bgColor = 'bg-orange-50';
+      borderColor = 'border-orange-400';
+      textColor = 'text-orange-800';
+    } else {
+      alertMessage =
+        '✅ Good balance between holding and ordering costs. Keep monitoring to maintain efficiency.';
+      bgColor = 'bg-green-50';
+      borderColor = 'border-green-400';
+      textColor = 'text-green-800';
+    }
+
+    return (
+      <div className={`${bgColor} border-l-4 ${borderColor} ${textColor} p-4 mb-4 rounded`} role="alert">
+        <strong className="font-bold">💡 Inventory Insight:</strong>
+        <span className="block sm:inline">{' ' + alertMessage}</span>
+      </div>
+    );
+  })()}
+
+  <h2 className="text-xl font-semibold mb-4 text-gray-700">💰 Cost Breakdown</h2>
+  <PieChart width={400} height={300}>
+    <Pie
+      data={[
+        { name: 'Holding Cost', value: data.total_holding_cost },
+        { name: 'Ordering Cost', value: data.total_ordering_cost },
+      ]}
+      dataKey="value"
+      nameKey="name"
+      cx="50%"
+      cy="50%"
+      outerRadius={100}
+      label
+    >
+      <Cell fill="#8884d8" />
+      <Cell fill="#82ca9d" />
+    </Pie>
+    <Tooltip />
+    <Legend />
+  </PieChart>
+</div>
+
         </>
       )}
     </div>
