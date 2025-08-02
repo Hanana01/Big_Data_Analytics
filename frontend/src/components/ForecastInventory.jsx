@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import { LineChart } from '@mui/x-charts/LineChart';
 import { TextField, Button, CircularProgress } from '@mui/material';
+import { PieChart, Pie, Cell, Legend, Tooltip } from 'recharts';
 
 export default function ForecastInventoryMui() {
   const [pid, setPid] = useState('');
@@ -124,7 +125,7 @@ const productsList = [
       {!loading && data && (
         <>
           {/* Summary Card */}
-          <div className="container bg-white p-6 rounded-lg shadow border border-gray-100 space-y-2">
+          {/* <div className="container bg-white p-6 rounded-lg shadow border border-gray-100 space-y-2">
             <h2 className="text-2xl font-bold mb-2 text-gray-800">📦 Inventory Summary</h2>
             <p><span className="font-medium">Date Range:</span> {chartData.date_range.from} → {chartData.date_range.to}</p>
             <hr className="my-2" />
@@ -138,7 +139,7 @@ const productsList = [
                 {chartData.reorder_needed ? '🚨 Reorder Needed' : '✅ Inventory Sufficient'}
               </span>
             </p>
-          </div>
+          </div> */}
 
           {/* Demand Forecast Chart */}
           <div className="bg-white p-6 rounded-lg shadow border border-gray-100">
@@ -192,59 +193,147 @@ const productsList = [
 
 
           {/* Inventory Optimization Chart */}
-          <div className="bg-white p-6 rounded-lg shadow border border-gray-100">
-            <h2 className="text-xl font-semibold mb-4 text-gray-700">📊 Inventory Optimization Metrics</h2>
-            <LineChart
-              xAxis={[{ scaleType: 'band', data: xLabels }]}
-              series={[
-                {
-                  data: chartData.chart.map(() => chartData.eoq),
-                  label: 'EOQ',
-                  color: '#228B22',
-                  curve: 'linear',
-                },
-                {
-                  data: chartData.chart.map(() => chartData.safety_stock),
-                  label: 'Safety Stock',
-                  color: '#FFA500',
-                  curve: 'linear',
-                },
-                {
-                  data: chartData.chart.map(() => chartData.reorder_point),
-                  label: 'Reorder Point',
-                  color: '#FF0000',
-                  curve: 'linear',
-                },
-                {
-                  data: chartData.chart.map(() => chartData.inventory_level),
-                  label: 'Current Inventory',
-                  color: '#800080',
-                  curve: 'linear',
-                },
-                {
-                  data: chartData.chart.map((item) => item.actual),
-                  label: 'Actual Demand',
-                  color: '#8884d8',
-                  curve: 'linear',
-                },
-                {
-                  data: chartData.chart.map((item) => item.predicted),
-                  label: 'Predicted Demand',
-                  color: '#82ca9d',
-                  curve: 'linear',
-                },
-                {
-                  data: chartData.chart.map((item) => item.units_sold),
-                  label: 'Sold Units',
-                  color: '#00BFFF',
-                  curve: 'linear',
-                },
-              ]}
-              height={350}
-              tooltip
-              legend
-            />
-          </div>
+ <div className="bg-white p-6 rounded-lg shadow border border-gray-100">
+  <h2 className="text-xl font-semibold mb-4 text-gray-700">📊 Inventory Optimization Metrics (Last 30 Days)</h2>
+  <LineChart
+    xAxis={[{ scaleType: 'band', data: xLabels }]}
+    series={[
+      {
+        data: chartData.chart.map(() => chartData.eoq),
+        label: 'EOQ',
+        color: '#228B22',
+        curve: 'linear',
+      },
+      {
+        data: chartData.chart.map(() => chartData.safety_stock),
+        label: 'Safety Stock',
+        color: '#FFA500',
+        curve: 'linear',
+      },
+      {
+        data: chartData.chart.map((_, idx) => chartData.reorder_point_daily[idx]),
+        label: 'Reorder Point',
+        color: '#FF0000',
+        curve: 'linear',
+      },
+      {
+        data: chartData.chart.map((item) => item.inventory_level),
+        label: 'Current Inventory',
+        color: '#800080',
+        curve: 'linear',
+      },
+      {
+        data: chartData.chart.map((item) => item.actual),
+        label: 'Actual Demand',
+        color: '#8884d8',
+        curve: 'linear',
+      },
+      {
+        data: chartData.chart.map((item) => item.predicted),
+        label: 'Predicted Demand',
+        color: '#82ca9d',
+        curve: 'linear',
+      },
+      // {
+      //   data: chartData.chart.map((item) => item.units_sold),
+      //   label: 'Sold Units',
+      //   color: '#00BFFF',
+      //   curve: 'linear',
+      // },
+    ]}
+    height={350}
+    tooltip
+    legend
+  />
+</div>
+
+      <div className="mt-6 bg-white p-4 rounded-lg shadow border border-gray-100 max-h-64 overflow-auto">
+  <h3 className="text-lg font-semibold mb-3 text-gray-700">📅 Daily Reorder Status</h3>
+   <table className="w-full text-sm text-left border-collapse border border-gray-300">     <thead>       <tr>
+        <th className="border border-gray-300 px-2 py-1">Date</th>
+        <th className="border border-gray-300 px-2 py-1">Inventory Level</th>
+         <th className="border border-gray-300 px-2 py-1">Reorder Point</th>
+         <th className="border border-gray-300 px-2 py-1">Status</th>
+      </tr>     </thead>
+    <tbody>
+       {data.chart.map((item, idx) => {
+        const reorderPoint = data.reorder_point_daily ? data.reorder_point_daily[idx] : data.reorder_point;
+        const status = item.inventory_level <= reorderPoint ? '🚨 Reorder Needed' : '✅ OK';         const statusColor = item.inventory_level <= reorderPoint ? 'text-red-600' : 'text-green-600';
+        return (
+          <tr key={item.Date}>
+            <td className="border border-gray-300 px-2 py-1">{item.Date}</td>
+          <td className="border border-gray-300 px-2 py-1">{item.inventory_level}</td>
+             <td className="border border-gray-300 px-2 py-1">{reorderPoint.toFixed(2)}</td>
+             <td className={`border border-gray-300 px-2 py-1 font-semibold ${statusColor}`}>{status}</td>
+          </tr>
+        );       })}
+    </tbody>
+   </table>
+    </div>
+
+
+          {/* Cost Breakdown Pie Chart */}
+<div className="bg-white p-6 rounded-lg shadow border border-gray-100 mt-8">
+  {/* Dynamic Alert Message */}
+  {(() => {
+    const holding = data.total_holding_cost;
+    const ordering = data.total_ordering_cost;
+    let alertMessage = '';
+    let bgColor = 'bg-yellow-50';
+    let borderColor = 'border-yellow-400';
+    let textColor = 'text-yellow-800';
+
+    if (holding > 1.5 * ordering) {
+      alertMessage =
+        '⚠️ High holding costs detected. Consider reducing overstock or ordering in smaller batches.';
+      bgColor = 'bg-red-50';
+      borderColor = 'border-red-400';
+      textColor = 'text-red-800';
+    } else if (ordering > 1.5 * holding) {
+      alertMessage =
+        '⚠️ High ordering costs detected. Consider increasing order quantity or reducing order frequency.';
+      bgColor = 'bg-orange-50';
+      borderColor = 'border-orange-400';
+      textColor = 'text-orange-800';
+    } else {
+      alertMessage =
+        '✅ Good balance between holding and ordering costs. Keep monitoring to maintain efficiency.';
+      bgColor = 'bg-green-50';
+      borderColor = 'border-green-400';
+      textColor = 'text-green-800';
+    }
+
+    return (
+      <div className={`${bgColor} border-l-4 ${borderColor} ${textColor} p-4 mb-4 rounded`} role="alert">
+        <strong className="font-bold">💡 Inventory Insight:</strong>
+        <span className="block sm:inline">{' ' + alertMessage}</span>
+      </div>
+    );
+  })()}
+
+  <h2 className="text-xl font-semibold mb-4 text-gray-700">💰 Cost Breakdown</h2>
+  <PieChart width={400} height={300}>
+    <Pie
+      data={[
+        { name: 'Holding Cost', value: data.total_holding_cost },
+        { name: 'Ordering Cost', value: data.total_ordering_cost },
+      ]}
+      dataKey="value"
+      nameKey="name"
+      cx="50%"
+      cy="50%"
+      outerRadius={100}
+      label
+    >
+      <Cell fill="#8884d8" />
+      <Cell fill="#82ca9d" />
+    </Pie>
+    <Tooltip />
+    <Legend />
+  </PieChart>
+</div>
+
+    
         </>
       )}
     </div>
