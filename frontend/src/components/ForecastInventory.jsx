@@ -88,16 +88,21 @@ const productsList = [
               </option>
             ))}
           </select>
-          <TextField
-            label="Store ID"                       
-            type="number"
-            value={storeId}                         
-            onChange={(e) => setStoreId(e.target.value)} 
-            size="small"
-            inputProps={{ min: 0, max: 5 }}
+          <select
             required
-            className="w-40"
-          />
+            value={storeId}
+            onChange={(e) => setStoreId(e.target.value)}
+            className="w-40 p-2 border border-gray-300 rounded"
+          >
+            <option value="" disabled>
+              Select Store
+            </option>
+            {[1, 2, 3, 4, 5].map((id) => (
+              <option key={id} value={id}>
+                Store {id}
+              </option>
+            ))}
+          </select>
           <Button
             type="submit"
             variant="contained"
