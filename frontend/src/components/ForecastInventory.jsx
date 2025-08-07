@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState } from 'react';
 import { LineChart } from '@mui/x-charts/LineChart';
-import { TextField, Button, CircularProgress } from '@mui/material';
+import { Button, CircularProgress } from '@mui/material';
 import { PieChart, Pie, Cell, Legend, Tooltip } from 'recharts';
 
 export default function ForecastInventoryMui() {
@@ -32,22 +32,6 @@ const productsList = [
   { id: 19, name: "Sunglasses" },
   { id: 20, name: "Hat" },
 ];
-  // const fetchData = async (e) => {
-  //   e.preventDefault();
-  //   setLoading(true);
-  //   try {
-  //     const res = await fetch(`http://localhost:5000/forecast-inventory?product_id=${pid}&store_id=${storeId}`);  // changed here
-  //     const resJson = await res.json();
-  //     if (!res.ok) throw new Error(resJson.error || 'Failed to fetch');
-  //     setData(resJson);
-  //     setError('');
-  //   } catch (e) {
-  //     setData(null);
-  //     setError(e.message);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
   const fetchData = async (e) => {
   e.preventDefault();
   setLoading(true);
@@ -126,26 +110,11 @@ const productsList = [
         </div>
       )}
 
+
       {/* Summary & Charts if Data Exists */}
       {!loading && data && (
         <>
-          {/* Summary Card */}
-          {/* <div className="container bg-white p-6 rounded-lg shadow border border-gray-100 space-y-2">
-            <h2 className="text-2xl font-bold mb-2 text-gray-800">📦 Inventory Summary</h2>
-            <p><span className="font-medium">Date Range:</span> {chartData.date_range.from} → {chartData.date_range.to}</p>
-            <hr className="my-2" />
-            <p><span className="font-medium">EOQ:</span> {chartData.eoq}</p>
-            <p><span className="font-medium">Safety Stock:</span> {chartData.safety_stock}</p>
-            <p><span className="font-medium">Reorder Point:</span> {chartData.reorder_point}</p>
-            <p><span className="font-medium">Current Inventory:</span> {chartData.daily_inventory_levels}</p>
-            <p>
-              <span className="font-medium">Status:</span>{' '}
-              <span className={chartData.reorder_needed ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
-                {chartData.reorder_needed ? '🚨 Reorder Needed' : '✅ Inventory Sufficient'}
-              </span>
-            </p>
-          </div> */}
-
+        
           {/* Demand Forecast Chart */}
           <div className="bg-white p-6 rounded-lg shadow border border-gray-100">
             <h2 className="text-xl font-semibold mb-4 text-gray-700">📈 Demand Forecast (Last 30 Days)</h2>
@@ -223,7 +192,7 @@ const productsList = [
       },
       {
         data: chartData.chart.map((item) => item.inventory_level),
-        label: 'Current Inventory',
+        label: 'predicted Inventory level',
         color: '#800080',
         curve: 'linear',
       },
@@ -245,9 +214,34 @@ const productsList = [
       //   color: '#00BFFF',
       //   curve: 'linear',
       // },
+{
+  data: chartData.chart.map((item) => item.xgb_sales_pred),
+  label: 'Predicted Sales',
+  color: '#FF6347', // Tomato red or change as needed
+  curve: 'linear',
+},
+
     ]}
     height={350}
-    tooltip
+    // tooltip
+    tooltip={{
+    trigger: 'item',
+    renderTooltip: ({ index }) => {
+      const item = chartData.chart[index];
+      const reorderPoint = chartData.reorder_point_daily
+        ? chartData.reorder_point_daily[index]
+        : chartData.reorder_point;
+      const status = item.inventory_level <= reorderPoint ? '🚨 Reorder Needed' : '✅ OK';
+      return (
+        <div className="bg-white p-2 rounded shadow text-sm text-gray-800">
+          <p><strong>Date:</strong> {item.Date}</p>
+          <p><strong>Inventory:</strong> {item.inventory_level}</p>
+          <p><strong>Reorder Point:</strong> {reorderPoint.toFixed(2)}</p>
+          <p><strong>Status:</strong> {status}</p>
+        </div>
+      );
+    }
+  }}
     legend
   />
 </div>
@@ -256,19 +250,20 @@ const productsList = [
   <h3 className="text-lg font-semibold mb-3 text-gray-700">📅 Daily Reorder Status</h3>
    <table className="w-full text-sm text-left border-collapse border border-gray-300">     <thead>       <tr>
         <th className="border border-gray-300 px-2 py-1">Date</th>
-        <th className="border border-gray-300 px-2 py-1">Inventory Level</th>
+        <th className="border border-gray-300 px-2 py-1">Predicted Inventory Level</th>
          <th className="border border-gray-300 px-2 py-1">Reorder Point</th>
          <th className="border border-gray-300 px-2 py-1">Status</th>
       </tr>     </thead>
     <tbody>
        {data.chart.map((item, idx) => {
         const reorderPoint = data.reorder_point_daily ? data.reorder_point_daily[idx] : data.reorder_point;
-        const status = item.inventory_level <= reorderPoint ? '🚨 Reorder Needed' : '✅ OK';         const statusColor = item.inventory_level <= reorderPoint ? 'text-red-600' : 'text-green-600';
+        const status = item.inventory_level <= reorderPoint ? '🚨 Reorder Needed' : '✅ OK';         
+        const statusColor = item.inventory_level <= reorderPoint ? 'text-red-600' : 'text-green-600';
         return (
           <tr key={item.Date}>
             <td className="border border-gray-300 px-2 py-1">{item.Date}</td>
           <td className="border border-gray-300 px-2 py-1">{item.inventory_level}</td>
-             <td className="border border-gray-300 px-2 py-1">{reorderPoint.toFixed(2)}</td>
+             <td className="border border-gray-300 px-2 py-1">{Math.round(reorderPoint)}</td>
              <td className={`border border-gray-300 px-2 py-1 font-semibold ${statusColor}`}>{status}</td>
           </tr>
         );       })}
@@ -335,6 +330,37 @@ const productsList = [
     </Pie>
     <Tooltip />
     <Legend />
+  </PieChart>
+</div>
+{/* Stockout and Overstock Summary */}
+<div className="bg-white p-6 rounded-lg shadow border border-gray-100 mt-8">
+  <h2 className="text-xl font-semibold mb-4 text-gray-700">📊 Stockout vs Overstock Days (Last 30 Days)</h2>
+  <p className="mb-4 text-gray-700">
+    Total Stockout Days: <strong>{data.stockout_days}</strong><br />
+    Total Overstock Days: <strong>{data.overstock_days}</strong>
+  </p>
+
+  {/* Pie chart for Stockout vs Overstock */}
+  <PieChart width={800} height={250}>
+    <Pie
+      data={[
+        { name: 'Stockout Days', value: data.stockout_days },
+        { name: 'Overstock Days', value: data.overstock_days },
+        { name: 'Normal Stock Days', value: 30 - (data.stockout_days + data.overstock_days) },
+      ]}
+      dataKey="value"
+      nameKey="name"
+      cx="50%"
+      cy="50%"
+      outerRadius={80}
+      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+    >
+      <Cell fill="#FF4136" /> {/* Red for Stockout */}
+      <Cell fill="#FF851B" /> {/* Orange for Overstock */}
+      <Cell fill="#2ECC40" /> {/* Green for Normal */}
+    </Pie>
+    <Tooltip />
+    <Legend verticalAlign="bottom" height={36} />
   </PieChart>
 </div>
 

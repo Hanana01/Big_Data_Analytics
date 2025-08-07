@@ -9,7 +9,7 @@ sns.set_style("whitegrid")
 plt.figure(figsize=(10, 6))
 
 # Load the data
-df = pd.read_csv('xgboost_advanced_predictions.csv')
+df = pd.read_csv('./data/xgboost_testset_predictions.csv')
 
 # 1. Calculate Demand Prediction Error Metrics
 df['Absolute_Error'] = np.abs(df['Predicted_Demand'] - df['Demand'])
@@ -36,9 +36,6 @@ print("="*50)
 print(f"Mean Absolute Error (MAE): {mae:.2f}")
 print(f"Mean Absolute Percentage Error (MAPE): {mape:.1f}%")
 print(f"Total Products Analyzed: {len(df)}")
-# print(f"Products with Perfect Prediction: {(df['Absolute_Error'] == 0).sum()}")
-# print(f"Products Over-Predicted: {(df['Predicted_Demand'] > df['Demand']).sum()}")
-# print(f"Products Under-Predicted: {(df['Predicted_Demand'] < df['Demand']).sum()}")
 
 # 2. Visualize Predicted vs Actual Demand
 plt.figure(figsize=(12, 8))
@@ -61,7 +58,7 @@ plt.xlabel('Predicted Demand', fontsize=14)
 plt.ylabel('Actual Demand', fontsize=14)
 plt.legend(title='Product Category')
 plt.tight_layout()
-plt.savefig('predicted_vs_actual_demand.png', dpi=300)
+plt.savefig('images/predicted_vs_actual_demand.png', dpi=300)
 plt.show()
 
 # 3. Error Distribution Analysis
@@ -75,7 +72,6 @@ sns.histplot(
 plt.title('Distribution of Prediction Errors', fontsize=16)
 plt.xlabel('Absolute Prediction Error', fontsize=14)
 plt.ylabel('Frequency', fontsize=14)
-plt.savefig('error_distribution_demand.png', dpi=300)
 plt.show()
 
 # 4. Worst/Best Performing Predictions
@@ -131,13 +127,11 @@ if 'Date' in df.columns:
     plt.ylabel('Mean Absolute Error', fontsize=14)
     plt.xticks(rotation=45)
     plt.tight_layout()
-    plt.savefig('monthly_error_trend_demand.png', dpi=300)
+    plt.savefig('images/monthly_error_trend_demand.png', dpi=300)
     plt.show()
 
 # Save the enhanced dataset
-df.to_csv('inventory_data_with_demand_analysis.csv', index=False)
+df.to_csv('../data/inventory_data_with_demand_analysis.csv', index=False)
 print("\nAnalysis complete. Results saved to:")
 print("- predicted_vs_actual_demand.png")
-print("- error_distribution_demand.png")
-print("- monthly_error_trend_demand.png (if date column present)")
 print("- inventory_data_with_demand_analysis.csv")

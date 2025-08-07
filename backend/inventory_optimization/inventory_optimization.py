@@ -16,7 +16,7 @@ def calculate_inventory_metrics(demand_forecast, holding_cost, lead_time, orderi
 
 def main():
     try:
-        df = pd.read_csv("xgboost_advanced_predictions.csv")
+        df = pd.read_csv("./data/xgboost_testset_predictions.csv")
         df.columns = df.columns.str.strip()
     except FileNotFoundError:
         print("❌ File 'xgboost_advanced_predictions.csv' not found.")

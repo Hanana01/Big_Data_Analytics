@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.impute import SimpleImputer
 
 # Load the dataset
-df = pd.read_csv('../data/inventory_data.csv')
+df = pd.read_csv('./data/inventory_data.csv')
 
 # Drop Product Name
 df.drop(columns=['Product Name'], inplace=True)
@@ -37,4 +37,4 @@ df['Seasonality'] = df['Seasonality'].map(season_map)
 print(df.head())
 
 # Save the preprocessed dataset
-df.to_csv('ecommerce_demand_data.csv', index=False)
+df.to_csv('./data/ecommerce_demand_data.csv', index=False)
